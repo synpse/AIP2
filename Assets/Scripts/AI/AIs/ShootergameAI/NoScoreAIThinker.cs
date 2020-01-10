@@ -212,4 +212,244 @@ public class NoScoreAIThinker : IThinker
             }
         }
     }
+
+    private FutureMove? PlayPiece(Board board)
+    {
+        FutureMove? move = null;
+
+        foreach (Pos pos in allPiece)
+        {
+            if (move == null)
+            {
+                move = CheckColsShape(board, pos.col);
+            }
+        }
+
+        if (move == null)
+        {
+            foreach (Pos pos in allPiece)
+            {
+                if (move == null)
+                {
+                    move = CheckCols(board, pos.col);
+                }
+            }
+        }
+
+        return move;
+
+    }
+
+    private FutureMove? CheckEnemy(Board board)
+    {
+        FutureMove? move = null;
+
+        foreach (Pos pos in allPiece)
+        {
+            if (move == null)
+            {
+                move = CheckEnemyColsShape(board, pos.col);
+
+            }
+        }
+
+        if (move == null)
+        {
+            foreach (Pos pos in allPiece)
+            {
+                if (move == null)
+                {
+                    move = CheckEnemyCols(board, pos.col);
+
+                }
+            }
+        }
+
+        return move;
+    }
+
+    private FutureMove? CheckCols(Board board, int col)
+    {
+        FutureMove? move;
+        List<bool> threeInLine = new List<bool>(3);
+        Piece piece;
+        PColor enemyColor = color == PColor.White ? PColor.Red : PColor.White;
+
+        for (int i = 0; i < board.rows; i++)
+        {
+            if (board[i, col] == null)
+            {
+                return null;
+            }
+            piece = (Piece)board[i, col];
+            if (piece.color == board.Turn)
+            {
+                threeInLine.Add(true);
+            }
+            else
+            {
+                threeInLine.RemoveRange(0, threeInLine.Count);
+            }
+            if (threeInLine.Count == 3)
+            {
+                if (board[i + 1, col].HasValue || i == board.rows)
+                {
+                    piece = (Piece)board[i + 1, col];
+                    if (piece.color == enemyColor)
+                    {
+                        threeInLine.RemoveRange(0, threeInLine.Count);
+                    }
+                }
+                else
+                {
+                    if (!board.IsColumnFull(col))
+                    {
+                        return move = new FutureMove(col, shape);
+                    }
+
+                }
+            }
+        }
+
+        return move = null;
+    }
+
+    private FutureMove? CheckColsShape(Board board, int col)
+    {
+        FutureMove? move;
+        List<bool> threeInLine = new List<bool>();
+        Piece piece;
+        PShape enemyShape =
+            color == PColor.White ? PShape.Square : PShape.Round;
+
+        for (int i = 0; i < board.rows; i++)
+        {
+            if (board[i, col] == null)
+            {
+                return null;
+            }
+            piece = (Piece)board[i, col];
+            if (piece.shape == shape)
+            {
+                threeInLine.Add(true);
+            }
+            else
+            {
+                threeInLine.RemoveRange(0, threeInLine.Count);
+            }
+            if (threeInLine.Count == 3)
+            {
+                if (board[i + 1, col].HasValue || i == board.rows)
+                {
+                    piece = (Piece)board[i + 1, col];
+                    if (piece.shape == enemyShape)
+                    {
+                        threeInLine.RemoveRange(0, threeInLine.Count);
+                    }
+                }
+                else
+                {
+                    return move = new FutureMove(col, shape);
+
+                }
+
+            }
+        }
+
+        return move = null;
+    }
+
+    private FutureMove? CheckEnemyCols(Board board, int col)
+    {
+        FutureMove? move;
+        List<bool> threeInLine = new List<bool>(3);
+        Piece piece;
+        PColor enemyColor = color == PColor.White ? PColor.Red : PColor.White;
+
+        for (int i = 0; i < board.rows; i++)
+        {
+            if (board[i, col] == null)
+            {
+                return null;
+            }
+
+            piece = (Piece)board[i, col];
+            if (piece.color == enemyColor)
+            {
+                threeInLine.Add(true);
+            }
+            else
+            {
+                threeInLine.RemoveRange(0, threeInLine.Count);
+            }
+            if (threeInLine.Count == 3)
+            {
+                if (board[i + 1, col].HasValue || i == board.rows)
+                {
+                    piece = (Piece)board[i + 1, col];
+                    if (piece.color == color)
+                    {
+                        threeInLine.RemoveRange(0, threeInLine.Count);
+                    }
+                }
+                else
+                {
+                    if (!board.IsColumnFull(col))
+                    {
+                        return move = new FutureMove(col, shape);
+                    }
+
+                }
+
+            }
+        }
+
+        return move = null;
+    }
+
+    private FutureMove? CheckEnemyColsShape(Board board, int col)
+    {
+        FutureMove? move;
+        List<bool> threeInLine = new List<bool>();
+        Piece piece;
+        PShape enemyShape =
+            color == PColor.White ? PShape.Square : PShape.Round;
+
+        for (int i = 0; i < board.rows; i++)
+        {
+            if (board[i, col] == null)
+            {
+                return null;
+            }
+            piece = (Piece)board[i, col];
+            if (piece.shape == enemyShape)
+            {
+                threeInLine.Add(true);
+            }
+            else
+            {
+                threeInLine.RemoveRange(0, threeInLine.Count);
+            }
+            if (threeInLine.Count == 3)
+            {
+                if (board[i + 1, col].HasValue || i == board.rows)
+                {
+                    piece = (Piece)board[i + 1, col];
+                    if (piece.shape == shape)
+                    {
+                        threeInLine.RemoveRange(0, threeInLine.Count);
+                    }
+                }
+                else
+                {
+                    if (!board.IsColumnFull(col))
+                    {
+                        return move = new FutureMove(col, shape);
+                    }
+                }
+            }
+        }
+
+        return move = null;
+    }
 }
