@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class NoScoreAIThinker : IThinker
 {
+    private List<Pos> positions = new List<Pos>();
+
     private System.Random random;
 
     private List<Pos> enemyPiece = new List<Pos>();
@@ -11,6 +13,8 @@ public class NoScoreAIThinker : IThinker
     private List<Pos> myPiece = new List<Pos>();
 
     private List<Pos> allPiece = new List<Pos>();
+
+    private readonly int maxDepth = 20;
 
     PColor color;
 
@@ -31,6 +35,8 @@ public class NoScoreAIThinker : IThinker
 
     public FutureMove Think(Board board, CancellationToken ct)
     {
+        FutureMove? test;
+        Play play;
         random = new System.Random();
 
         color = board.Turn;
@@ -55,6 +61,18 @@ public class NoScoreAIThinker : IThinker
 
         Check(board);
 
+        test = PlayPiece(board);
+        if (test != null)
+        {
+            return (FutureMove)test;
+        }
+
+        test = CheckEnemy(board);
+        if (test != null)
+        {
+            return (FutureMove)test;
+        }
+
         play = Negamax(board, board.Turn, maxDepth, ct);
 
         if (test != null)
@@ -69,7 +87,165 @@ public class NoScoreAIThinker : IThinker
             }
         }
 
+        if (allPiece.Count % 2 == 0)
+        {
+            test = CheckWinCorridors(board);
+        }
+        else
+        {
+            test = CheckEnemyWinCorridors(board);
+        }
+
+
+
+        if (test != null)
+        {
+            return (FutureMove)test;
+        }
+
+
         return new FutureMove(random.Next(0, board.cols), shape);
+    }
+
+    private FutureMove? CheckWinCorridors(Board board)
+    {
+        Piece piece;
+        foreach (IEnumerable<Pos> enumerable in board.winCorridors)
+        {
+            foreach (Pos pos in enumerable)
+            {
+                positions.Add(pos);
+            }
+        }
+
+        foreach (Pos pos in positions)
+        {
+            if (board[pos.row, pos.col] == null)
+            {
+                if (pos.col == 0)
+                {
+                    if (board[pos.row, pos.col + 1] != null)
+                    {
+                        piece = (Piece)board[pos.row, pos.col + 1];
+
+                        if (piece.color == board.Turn || piece.shape == shape)
+                        {
+                            return new FutureMove(pos.col, shape);
+                        }
+                    }
+
+                }
+                else if (pos.col == board.cols - 1)
+                {
+                    if (board[pos.row, pos.col - 1] != null)
+                    {
+                        piece = (Piece)board[pos.row, pos.col - 1];
+
+                        if (piece.color == board.Turn || piece.shape == shape)
+                        {
+                            return new FutureMove(pos.col, shape);
+                        }
+                    }
+                }
+                else
+                {
+                    if (board[pos.row, pos.col + 1] != null)
+                    {
+                        piece = (Piece)board[pos.row, pos.col + 1];
+
+                        if (piece.color == board.Turn || piece.shape == shape)
+                        {
+                            return new FutureMove(pos.col, shape);
+                        }
+                    }
+
+                    if (board[pos.row, pos.col - 1] != null)
+                    {
+                        piece = (Piece)board[pos.row, pos.col - 1];
+                        if (piece.color == board.Turn || piece.shape == shape)
+                        {
+                            return new FutureMove(pos.col, shape);
+                        }
+                    }
+                }
+
+            }
+        }
+
+        return null;
+    }
+
+    private FutureMove? CheckEnemyWinCorridors(Board board)
+    {
+        Piece piece;
+        PColor enemyColor =
+            color == PColor.White ? PColor.Red : PColor.White;
+        PShape enemyShape =
+            shape == PShape.Round ? PShape.Square : PShape.Round;
+
+        foreach (IEnumerable<Pos> enumerable in board.winCorridors)
+        {
+            foreach (Pos pos in enumerable)
+            {
+                positions.Add(pos);
+            }
+        }
+
+        foreach (Pos pos in positions)
+        {
+            if (board[pos.row, pos.col] == null)
+            {
+                if (pos.col == 0)
+                {
+                    if (board[pos.row, pos.col + 1] != null)
+                    {
+                        piece = (Piece)board[pos.row, pos.col + 1];
+
+                        if (piece.color == enemyColor || piece.shape == enemyShape)
+                        {
+                            return new FutureMove(pos.col, shape);
+                        }
+                    }
+
+                }
+                else if (pos.col == board.cols - 1)
+                {
+                    if (board[pos.row, pos.col - 1] != null)
+                    {
+                        piece = (Piece)board[pos.row, pos.col - 1];
+
+                        if (piece.color == enemyColor || piece.shape == enemyShape)
+                        {
+                            return new FutureMove(pos.col, shape);
+                        }
+                    }
+                }
+                else
+                {
+                    if (board[pos.row, pos.col + 1] != null)
+                    {
+                        piece = (Piece)board[pos.row, pos.col + 1];
+
+                        if (piece.color == enemyColor || piece.shape == enemyShape)
+                        {
+                            return new FutureMove(pos.col, shape);
+                        }
+                    }
+
+                    if (board[pos.row, pos.col - 1] != null)
+                    {
+                        piece = (Piece)board[pos.row, pos.col - 1];
+                        if (piece.color == enemyColor || piece.shape == enemyShape)
+                        {
+                            return new FutureMove(pos.col, shape);
+                        }
+                    }
+                }
+
+            }
+        }
+
+        return null;
     }
 
     private Play Negamax(Board board, PColor turn, int maxDepth, CancellationToken ct)
@@ -236,36 +412,156 @@ public class NoScoreAIThinker : IThinker
             }
         }
 
-        return move;
-
-    }
-
-    private FutureMove? CheckEnemy(Board board)
-    {
-        FutureMove? move = null;
-
-        foreach (Pos pos in allPiece)
-        {
-            if (move == null)
-            {
-                move = CheckEnemyColsShape(board, pos.col);
-
-            }
-        }
-
         if (move == null)
         {
             foreach (Pos pos in allPiece)
             {
                 if (move == null)
                 {
-                    move = CheckEnemyCols(board, pos.col);
-
+                    move = CheckRowsColorShape(board, pos.row);
                 }
             }
         }
 
         return move;
+
+    }
+
+    private FutureMove? CheckRowsColorShape(Board board, int row)
+    {
+        string[] check = new string[board.cols];
+        string result = "";
+        const string pos1 = "_OOO";
+        const string pos2 = "O_OO";
+        const string pos3 = "OO_O";
+        const string pos4 = "OOO_";
+
+        for (int col = 0; col < board.cols; col++)
+        {
+            if (board[row, col] != null)
+            {
+                if (board[row, col].Value.color == color || board[row, col].Value.shape == shape)
+                {
+                    check[col] = "O";
+                }
+                else if (board[row, col].Value.color != color || board[row, col].Value.shape != shape)
+                {
+                    check[col] = "X";
+                }
+            }
+            else
+            {
+                check[col] = "_";
+            }
+        }
+
+        for (int i = 0; i < check.Length; i++)
+        {
+            result += check[i];
+        }
+
+        if (result.Contains(pos1))
+        {
+            return PlayWinBlockRow(board, pos1, check);
+        }
+        else if (result.Contains(pos2))
+        {
+            return PlayWinBlockRow(board, pos2, check);
+        }
+        else if (result.Contains(pos3))
+        {
+            return PlayWinBlockRow(board, pos3, check);
+        }
+        else if (result.Contains(pos4))
+        {
+            return PlayWinBlockRow(board, pos4, check);
+        }
+        return null;
+    }
+
+    private FutureMove? CheckEnemyRowsColorShape(Board board, int row)
+    {
+        string[] check = new string[board.cols];
+        string result = "";
+        const string pos1 = "_OOO";
+        const string pos2 = "O_OO";
+        const string pos3 = "OO_O";
+        const string pos4 = "OOO_";
+
+        for (int col = 0; col < board.cols; col++)
+        {
+            if (board[row, col] != null)
+            {
+                if (board[row, col].Value.color != color || board[row, col].Value.shape != shape)
+                {
+                    check[col] = "O";
+                }
+                else if (board[row, col].Value.color == color || board[row, col].Value.shape == shape)
+                {
+                    check[col] = "X";
+                }
+            }
+            else
+            {
+                check[col] = "_";
+            }
+        }
+
+        for (int i = 0; i < check.Length; i++)
+        {
+            result += check[i];
+        }
+
+        if (result.Contains(pos1))
+        {
+            return PlayWinBlockRow(board, pos1, check);
+        }
+        else if (result.Contains(pos2))
+        {
+            return PlayWinBlockRow(board, pos2, check);
+        }
+        else if (result.Contains(pos3))
+        {
+            return PlayWinBlockRow(board, pos3, check);
+        }
+        else if (result.Contains(pos4))
+        {
+            return PlayWinBlockRow(board, pos4, check);
+        }
+        return null;
+    }
+
+    private FutureMove? PlayWinBlockRow(Board board, string pos, string[] results)
+    {
+        int wCol = 0;
+
+        List<int> cols = new List<int>();
+        int x = 0;
+
+        for (int i = 0; i < results.Length; i++)
+        {
+            if (pos.Contains(results[i]))
+            {
+                Debug.LogError($"Added {results[i]}, range is {cols.Count}");
+                cols.Add(i);
+                if (results[i] == "_") wCol = i;
+                if (cols.Count == 4)
+                {
+                    Debug.LogError("RETURNED");
+                    return new FutureMove(wCol, shape);
+                }
+                x++;
+            }
+            else
+            {
+                if (cols.Count < 4)
+                {
+                    cols.RemoveRange(0, cols.Count);
+                }
+            }
+        }
+
+        return null;
     }
 
     private FutureMove? CheckCols(Board board, int col)
@@ -357,6 +653,45 @@ public class NoScoreAIThinker : IThinker
         }
 
         return move = null;
+    }
+
+    private FutureMove? CheckEnemy(Board board)
+    {
+        FutureMove? move = null;
+
+        foreach (Pos pos in allPiece)
+        {
+            if (move == null)
+            {
+                move = CheckEnemyColsShape(board, pos.col);
+
+            }
+        }
+
+        if (move == null)
+        {
+            foreach (Pos pos in allPiece)
+            {
+                if (move == null)
+                {
+                    move = CheckEnemyCols(board, pos.col);
+
+                }
+            }
+        }
+
+        if (move == null)
+        {
+            foreach (Pos pos in allPiece)
+            {
+                if (move == null)
+                {
+                    move = CheckEnemyRowsColorShape(board, pos.row);
+                }
+            }
+        }
+
+        return move;
     }
 
     private FutureMove? CheckEnemyCols(Board board, int col)
