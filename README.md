@@ -10,12 +10,12 @@ The following project was developed by the following students:
 
 * **André Pedro**
     * Report Elaboration
-    * Code Commenting
+    * Research
 * **Diogo Maia**
     * Negamax Algorithm
     * Scores
 * **Tiago Alves**
-    * Base
+    * A.I. Base
     * Verifications
 
 ## Developed Solution
@@ -32,17 +32,14 @@ Negamax is a simplified minimax variant, where each node (regardlessly of being 
 Our chosen static evaluation function (Heuristic) consists in going through `winCorridors` (a read-only public class avaliable from the professor's Unity project included in the assignment), composed of a collection that contains all the sequences of positions where favourable or winning sequences might exist.
 Then, the Heuristic will check if a `winCorridors` position has a neighbour (a game piece present in that position). If the neighbour piece belongs to the player, it will get the value "5". If it belongs to the enemy A.I., it will get the value "10".
 
-**What it do with this?**
 
-### Scores
+![FluxogramaHeuristica](./README_Anexos/FluxogramaHeuristica.svg)
 
-aaaaaaaaaaaaaaaaaaaaaa
-
-### Diagrams or schemes
-* That aid, enhance and/or simplify the description will have positive influence in the final grade.
 
 ## References
-* Including books, papers, websites, discussions with colleagues, reutilized open source code (e.g. from StackOverflow).
+[Millington, I. (2019). AI for Games (3rd ed.). CRC Press.](https://www.taylorfrancis.com/books/9781351053303)
+
+[NegaMax Pseudo-code](https://www.researchgate.net/figure/NegaMax-Algorithm-Pseudo-Code_fig3_262672371)
 
 [Negamax]:(https://en.wikipedia.org/wiki/Negamax)
 [Minimax]:(https://en.wikipedia.org/wiki/Minimax)
